@@ -90,8 +90,9 @@ namespace Método_de_Gauss_Seidel
             Console.Write("#{0}: ", numoperacion+1);
             foreach(float num in array)
             {
-                int j = 1;
+                int j = 1; //J siempre vale 1 y no se incrementa, por tanto todas las variables se imprimen como x1
                 Console.Write("{0} x{1} + ", num, j);
+                j++//Incrementamos
             }
             Console.WriteLine("\b\b= {0}", constante);
         }
