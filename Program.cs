@@ -6,31 +6,33 @@ using System.Threading.Tasks;
 
 namespace Método_de_Gauss_Seidel
 {
+    //Clase que representa una ecuacion del sistema
     class GaussSeidol
     {
-        public float[] array;
-        public float constante;
-        public int numoperacion;
+        public float[] array;    //Coeficientes de la ecuación
+        public float constante;    //Término independiente
+        public int numoperacion;    //Número de ecuación
 
         public GaussSeidol() {}
 
+        //Método para registrar datos desde consola
         public void Registro(int num, int var)
         {
             array = new float[var];
 
             for (int i = 0; i < var; i++)
             {
-                Console.Write("Valor de la variable {0}: ", i + 1);
+                Console.Write($"Valor de x{i + 1}: ");
                 array[i] = float.Parse(Console.ReadLine());
             }
 
-            Console.Write("\nCuál es el valor de la constante? ");
+            Console.Write("Constante: ");
             constante = float.Parse(Console.ReadLine());
-            Console.WriteLine();
 
             numoperacion = num;
         }
 
+        //Sobreescribe una ecuación (útil pasra intercambios)
         public void Overwrite(float[] arreglo, float cons, int num)
         {
             array = arreglo;
@@ -38,63 +40,33 @@ namespace Método_de_Gauss_Seidel
             numoperacion = num;
         }
 
-        public float[] Regreso()
-        {
-            return array;
-        }
+        public float [] Regreso() => array;
+        public float Regresocons() => constante;
+        public int Regresonum() => numoperacion;
 
-        public float Regresocons()
-        {
-            return constante;
-        }
+        //Verificar si la fila cumple diagonal dominante
+        public bool EsDiagonalDominante(){
+            float diagonal = Math.Abs(array[numoperacion]);
+            float suma = 0;
 
-        public int Regresonum()
-        {
-            return numoperacion;
-        }
-
-        public int Check()
-        {
-            bool var = true;
-            int error = 0;
-            int pos = 0;
-
-            foreach (float num in array)
-            {
-                if (num <= array[numoperacion])
-                {
-                    var = var && true;
-
-                    pos++;
-                }
-                else
-                {
-                    var = false;
-
-                    error = pos;
-                }
-                
+            for(int i = 0; i < array.Length; i++){
+                if(i != numoperacion)
+                    suma += Math.Abs(array[i]);
             }
-            if (var)
-            {
-                return 0;
-            }
-            else
-            {
-                return error;
-            }
+            return diagonal >= suma;
         }
 
+        //Muestra la ecuación en consola correctamente
         public void Mostrar()
         {
-            Console.Write("#{0}: ", numoperacion+1);
-            foreach(float num in array)
+            Console.Write($"#{numoperacion + 1}: ");
+
+            for (int j = 0; j < array.Length; j++)
             {
-                int j = 1; //J siempre vale 1 y no se incrementa, por tanto todas las variables se imprimen como x1
-                Console.Write("{0} x{1} + ", num, j);
-                j++//Incrementamos
+                Console.Write($"{array[j]}x{j + 1} + ");
             }
-            Console.WriteLine("\b\b= {0}", constante);
+
+            Console.WriteLine($"\b\b= {constante}");
         }
     }
 
@@ -102,96 +74,176 @@ namespace Método_de_Gauss_Seidel
     {
         static void Main(string[] args)
         {
-            int operaciones, operación = 0;
-
+            int operaciones;
+        
             Console.Write("Cuál es el número de operaciones a guardar? ");
             operaciones = int.Parse(Console.ReadLine());
-
-            float[] arreglo = new float[operaciones];
-
+        
             GaussSeidol[] ecuaciones = new GaussSeidol[operaciones];
-
+        
+            //Registro de ecuaciones
             for (int i = 0; i < operaciones; i++)
             {
-                Console.WriteLine("Operación Número {0}", operación + 1);
-
-                ecuaciones[operación] = new GaussSeidol();
-
-                ecuaciones[operación].Registro(operación, operaciones);
-
-                operación++;
+                Console.WriteLine($"\nEcuación {i + 1}");
+                ecuaciones[i] = new GaussSeidol();
+                ecuaciones[i].Registro(i, operaciones);
             }
-
-            operación = 0;
-
-            foreach(GaussSeidol ecuacion in ecuaciones)
+        
+            //Mostrar sistema original
+            Console.WriteLine("\nSistema ingresado:");
+            foreach (var eq in ecuaciones)
+                eq.Mostrar();
+        
+            //Intento de hacer diagonal dominante
+            //Se intercambian filas si es necesario
+            for (int i = 0; i < operaciones; i++)
             {
-                ecuaciones[operación].Mostrar();
-                operación++;
-            }
-
-
-            float[] temparray1 = new float[operaciones];
-            float tempconst1 = 0;
-            int tempnum1 = 0;
-
-            bool used = false;
-
-            float[] temparray2 = new float[operaciones];
-            float tempconst2 = 0;
-            int tempnum2 = 0;
-
-            bool incorrect = false;
-            int pos, poserror1 = 0, poserror2 = 0;
-
-            do
-            {
-                foreach (GaussSeidol ecuacion in ecuaciones)
+                if (!ecuaciones[i].EsDiagonalDominante())
                 {
-                    pos = ecuacion.Check();
-
-                    if (pos != 0)
+                    for (int j = i + 1; j < operaciones; j++)
                     {
-                        incorrect = true;
-
-                        if (used)
+                        if (Math.Abs(ecuaciones[j].array[i]) > Math.Abs(ecuaciones[i].array[i]))
                         {
-                            temparray1 = ecuacion.Regreso();
-                            tempconst1 = ecuacion.Regresocons();
-                            tempnum1 = ecuacion.Regresonum();
-
-                            poserror2 = pos;
-                        }
-                        else
-                        {
-                            temparray2 = ecuacion.Regreso();
-                            tempconst2 = ecuacion.Regresocons();
-                            tempnum2 = ecuacion.Regresonum();
-
-                            poserror1 = pos;
-
-                            used = true;
+                            // Intercambio de ecuaciones
+                            var tempArray = ecuaciones[i].Regreso();
+                            var tempConst = ecuaciones[i].Regresocons();
+                            var tempNum = ecuaciones[i].Regresonum();
+        
+                            ecuaciones[i].Overwrite(
+                                ecuaciones[j].Regreso(),
+                                ecuaciones[j].Regresocons(),
+                                ecuaciones[j].Regresonum()
+                            );
+        
+                            ecuaciones[j].Overwrite(tempArray, tempConst, tempNum);
                         }
                     }
                 }
-                if (incorrect)
-                {
-                    ecuaciones[poserror1].Overwrite(temparray2, tempconst2, tempnum2);
-                    ecuaciones[poserror2].Overwrite(temparray1, tempconst1, tempnum1);
-                }
-
-            } while (incorrect);
-
-            if (used)
+            }
+        
+            Console.WriteLine("\nSistema reordenado:");
+            foreach (var eq in ecuaciones)
+                eq.Mostrar();
+        
+            //Verificación  global de diagonal dominante
+            bool diagonalDominante = true;
+        
+            for (int i = 0; i < operaciones; i++)
             {
-                operación = 0;
-
-                foreach (GaussSeidol ecuacion in ecuaciones)
+                float diagonal = Math.Abs(ecuaciones[i].array[i]);
+                float suma = 0;
+        
+                for (int j = 0; j < operaciones; j++)
                 {
-                    ecuaciones[operación].Mostrar();
-                    operación++;
+                    if (i != j)
+                        suma += Math.Abs(ecuaciones[i].array[j]);
+                }
+        
+                if (diagonal < suma)
+                {
+                    diagonalDominante = false;
+                    break;
                 }
             }
+        
+            //Mensaje al usuario
+            if (!diagonalDominante)
+            {
+                Console.WriteLine("\n⚠ ADVERTENCIA:");
+                Console.WriteLine("La matriz NO es diagonal dominante.");
+                Console.WriteLine("El método de Gauss-Seidel puede NO converger.");
+        
+                Console.Write("\n¿Deseas continuar? (s/n): ");
+                string opcion = Console.ReadLine().ToLower();
+        
+                if (opcion != "s")
+                {
+                    Console.WriteLine("Programa detenido.");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("\n✔ La matriz es diagonal dominante. Se garantiza convergencia.");
+            }
+        
+            //Convertir a matriz
+            float[,] A = new float[operaciones, operaciones];
+            float[] b = new float[operaciones];
+        
+            for (int i = 0; i < operaciones; i++)
+            {
+                for (int j = 0; j < operaciones; j++)
+                    A[i, j] = ecuaciones[i].array[j];
+        
+                b[i] = ecuaciones[i].constante;
+            }
+        
+            //Parámetros
+            Console.Write("\nTolerancia: ");
+            float tol = float.Parse(Console.ReadLine());
+        
+            Console.Write("Máx iteraciones: ");
+            int maxIter = int.Parse(Console.ReadLine());
+        
+            float[] x = new float[operaciones];      // Solución actual
+            float[] x_old = new float[operaciones];  // Solución anterior
+        
+            // Inicializar en 0
+            for (int i = 0; i < operaciones; i++)
+                x[i] = 0;
+        
+            Console.WriteLine("\nIteraciones:\n");
+        
+            //Métdo de Gauss-Seidel
+            for (int k = 0; k < maxIter; k++)
+            {
+                // Guardar valores anteriores
+                for (int i = 0; i < operaciones; i++)
+                    x_old[i] = x[i];
+        
+                // Iteración
+                for (int i = 0; i < operaciones; i++)
+                {
+                    float suma = 0;
+        
+                    for (int j = 0; j < operaciones; j++)
+                    {
+                        if (j != i)
+                            suma += A[i, j] * x[j];
+                    }
+        
+                    x[i] = (b[i] - suma) / A[i, i];
+                }
+        
+                // Cálculo del error
+                float error = 0;
+                for (int i = 0; i < operaciones; i++)
+                {
+                    float e = Math.Abs((x[i] - x_old[i]) / (x[i] == 0 ? 1 : x[i]));
+                    if (e > error)
+                        error = e;
+                }
+        
+                // Mostrar iteración
+                Console.Write($"Iter {k + 1}: ");
+                for (int i = 0; i < operaciones; i++)
+                    Console.Write($"x{i + 1}={x[i]:F5} ");
+        
+                Console.WriteLine($" Error={error:F6}");
+        
+                // Criterio de paro
+                if (error < tol)
+                {
+                    Console.WriteLine("\nConvergencia alcanzada.");
+                    break;
+                }
+            }
+        
+            //Resultado Final
+            Console.WriteLine("\nSolución final:");
+            for (int i = 0; i < operaciones; i++)
+                Console.WriteLine($"x{i + 1} = {x[i]:F6}");
         }
     }
 }
