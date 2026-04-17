@@ -9,26 +9,29 @@ namespace Método_de_Gauss_Seidel
     //Clase que representa una ecuacion del sistema
     class GaussSeidol
     {
-        public float[] array;    //Coeficientes de la ecuación
+        public float[] array;    //Array de coeficientes
         public float constante;    //Término independiente
-        public int numoperacion;    //Número de ecuación
+        public int numoperacion;    //Índice de ecuación
 
         public GaussSeidol() {}
 
         //Método para registrar datos desde consola
         public void Registro(int num, int var)
         {
-            array = new float[var];
+            array = new float[var]; // Número de variables
 
+            // Se leen los coeficientes de cada variable
             for (int i = 0; i < var; i++)
             {
                 Console.Write($"Valor de x{i + 1}: ");
                 array[i] = float.Parse(Console.ReadLine());
             }
 
+            // Se lee el término independiente
             Console.Write("Constante: ");
             constante = float.Parse(Console.ReadLine());
 
+            // Se guarda el índice de la ecuación
             numoperacion = num;
         }
 
@@ -40,19 +43,22 @@ namespace Método_de_Gauss_Seidel
             numoperacion = num;
         }
 
+        // Métodos tipo "get" para acceder a los datos
         public float [] Regreso() => array;
         public float Regresocons() => constante;
         public int Regresonum() => numoperacion;
 
         //Verificar si la fila cumple diagonal dominante
         public bool EsDiagonalDominante(){
-            float diagonal = Math.Abs(array[numoperacion]);
+            float diagonal = Math.Abs(array[numoperacion]); // elemento diagonal
             float suma = 0;
 
+            // Suma de valores absolutos excepto la diagonal
             for(int i = 0; i < array.Length; i++){
                 if(i != numoperacion)
                     suma += Math.Abs(array[i]);
             }
+            // Condición de diagonal dominante
             return diagonal >= suma;
         }
 
@@ -66,6 +72,7 @@ namespace Método_de_Gauss_Seidel
                 Console.Write($"{array[j]}x{j + 1} + ");
             }
 
+            // \b\b elimina el último "+ "
             Console.WriteLine($"\b\b= {constante}");
         }
     }
@@ -75,7 +82,8 @@ namespace Método_de_Gauss_Seidel
         static void Main(string[] args)
         {
             int operaciones;
-        
+
+            // Número de ecuaciones (igual al número de incógnitas)
             Console.Write("Cuál es el número de operaciones a guardar? ");
             operaciones = int.Parse(Console.ReadLine());
         
@@ -102,13 +110,15 @@ namespace Método_de_Gauss_Seidel
                 {
                     for (int j = i + 1; j < operaciones; j++)
                     {
+                        // Se busca una fila con mejor coeficiente en la diagonal
                         if (Math.Abs(ecuaciones[j].array[i]) > Math.Abs(ecuaciones[i].array[i]))
                         {
                             // Intercambio de ecuaciones
                             var tempArray = ecuaciones[i].Regreso();
                             var tempConst = ecuaciones[i].Regresocons();
                             var tempNum = ecuaciones[i].Regresonum();
-        
+
+                            // Intercambiaio de filas
                             ecuaciones[i].Overwrite(
                                 ecuaciones[j].Regreso(),
                                 ecuaciones[j].Regresocons(),
@@ -212,7 +222,8 @@ namespace Método_de_Gauss_Seidel
                         if (j != i)
                             suma += A[i, j] * x[j];
                     }
-        
+
+                    // Fórmula principal
                     x[i] = (b[i] - suma) / A[i, i];
                 }
         
